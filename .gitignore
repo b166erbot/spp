@@ -1,0 +1,11 @@
+CREATE*
+*.exe
+*.db
+__pycache__
+*~
+tk*
+testes.py
+spp-antigo.py
+*.xcf
+Pip*
+#*#
