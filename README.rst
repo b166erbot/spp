@@ -1,5 +1,5 @@
 =======================
-Secure Protect Password
+Super Protect Password
 =======================
 
 :Author: `Bernardo Freitas <//github.com/bernardofreitas>`_

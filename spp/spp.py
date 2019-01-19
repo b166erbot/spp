@@ -16,11 +16,6 @@ def copy(cb, texto):
     cb.store()
 
 
-def paste():
-    # função atoa ou somente para testar com o arquivo testes.py
-    return Gtk.Clipboard().wait_for_text()
-
-
 class Janela:
     def __init__(self):
         # criando objetos.
@@ -118,7 +113,7 @@ class Janela:
             else:
                 mensagem = ('status: senhas desiguais ou caracteres inválidos'
                             ': __1, __2 ... __45')
-                self._status.set_text(0, mensagem)
+                self._status.push(0, mensagem)
         elif all([not self._nv, not self._trocar_senha.get_active(), senha]):
             # velho usuário
             if verificar_admin(senha):
