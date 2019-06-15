@@ -1,1 +1,0 @@
-from .bancodedados import *  # noqa

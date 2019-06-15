@@ -1,10 +1,9 @@
-#!\usr\bin\python3
 import gi
 from time import sleep
-from bancodedados import create_table, read_data
+from bancodedados.bancodedados import create_table, read_data
 from functions import (
-caracteresInvalidos, senha_admin, verificar_admin, criptaes, string,
-adicionar, atualizar, deletar, trocar_senha_admin, salt
+    caracteresInvalidos, senha_admin, verificar_admin, criptaes, string,
+    adicionar, atualizar, deletar, trocar_senha_admin, salt
 ) # noqa
 from random import choices
 gi.require_version('Gtk', '3.0')

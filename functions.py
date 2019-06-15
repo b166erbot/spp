@@ -1,6 +1,6 @@
-from bancodedados import (decorator, data_entry, read_data, update_data,
-                          delete_data)  # noqa
-from criptografia import AESCipher, dicionario
+from bancodedados.bancodedados import (decorator, data_entry, read_data,
+                                       update_data, delete_data)  # noqa
+from criptografia.criptografia_simetrica import AESCipher, dicionario
 from string import printable as string
 from random import choices
 from hashlib import sha512
