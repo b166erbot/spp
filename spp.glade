@@ -49,7 +49,7 @@ com segurança.</property>
             <property name="margin_left">2</property>
             <property name="margin_right">2</property>
             <property name="label" translatable="yes">é a primeira vez que você está usando o programa?
-insira uma nova senha de administrador e desfrute o programa.</property>
+insira uma nova senha de administrador e desfrute-o.</property>
             <property name="justify">center</property>
           </object>
           <packing>
@@ -80,7 +80,7 @@ insira uma nova senha de administrador e desfrute o programa.</property>
               <object class="GtkEntry" id="senha">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">senha com no máximo 16 caracteres</property>
+                <property name="tooltip_text" translatable="yes">senha com no máximo 20 caracteres</property>
                 <property name="margin_right">10</property>
                 <property name="max_length">20</property>
                 <property name="visibility">False</property>
@@ -308,37 +308,9 @@ insira uma nova senha de administrador e desfrute o programa.</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <child>
-              <object class="GtkScrolledWindow">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="shadow_type">in</property>
-                <property name="min_content_width">400</property>
-                <property name="min_content_height">250</property>
-                <child>
-                  <object class="GtkTreeView" id="treeview">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="tooltip_text" translatable="yes">preencha as colunas de acordo com as mesmas.</property>
-                    <property name="search_column">1</property>
-                    <property name="hover_expand">True</property>
-                    <property name="enable_grid_lines">both</property>
-                    <property name="enable_tree_lines">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection"/>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
@@ -349,11 +321,12 @@ insira uma nova senha de administrador e desfrute o programa.</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkButton" id="adicionar">
-                    <property name="label" translatable="yes">adicionar</property>
+                    <property name="label" translatable="yes">Adicionar</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">adiciona uma nova linha para inserir novos dados</property>
+                    <property name="tooltip_text" translatable="yes">adiciona novos dados.</property>
                     <property name="valign">center</property>
                   </object>
                   <packing>
@@ -363,13 +336,13 @@ insira uma nova senha de administrador e desfrute o programa.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="remover">
-                    <property name="label" translatable="yes">remover</property>
+                  <object class="GtkButton" id="atualizar">
+                    <property name="label" translatable="yes">Atualizar</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">remove somente a linha selecionada. esta é uma ação irreversível.</property>
-                    <property name="valign">center</property>
+                    <property name="tooltip_text" translatable="yes">atualiza os dados do item selecionado.</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -378,12 +351,13 @@ insira uma nova senha de administrador e desfrute o programa.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="remover_tudo">
-                    <property name="label" translatable="yes">remover tudo</property>
+                  <object class="GtkButton" id="remover">
+                    <property name="label" translatable="yes">Remover</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">remove todo o banco de dados.</property>
+                    <property name="tooltip_text" translatable="yes">remove somente a linha selecionada. esta é uma ação irreversível.</property>
                     <property name="valign">center</property>
                   </object>
                   <packing>
@@ -393,12 +367,14 @@ insira uma nova senha de administrador e desfrute o programa.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="copiar">
-                    <property name="label" translatable="yes">copiar senha</property>
+                  <object class="GtkButton" id="remover_tudo">
+                    <property name="label" translatable="yes">Remover tudo</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">copiar somente a senha para a área de transferência. sua senha ficará exposta na área de transferência, cuidado!</property>
+                    <property name="tooltip_text" translatable="yes">remove todo o banco de dados.</property>
+                    <property name="valign">center</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -407,15 +383,13 @@ insira uma nova senha de administrador e desfrute o programa.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="atualizar">
-                    <property name="label" translatable="yes">atualizar
-banco de
-dados</property>
+                  <object class="GtkButton" id="copiar">
+                    <property name="label" translatable="yes">Copiar senha</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">é muito importante que você atualize o banco de dados antes de sair pois caso contrário, suas alterações serão perdidas</property>
-                    <property name="valign">end</property>
+                    <property name="tooltip_text" translatable="yes">copiar somente a senha para a área de transferência. sua senha ficará exposta na área de transferência, cuidado!</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -425,9 +399,97 @@ dados</property>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="shadow_type">in</property>
+                    <property name="min_content_width">400</property>
+                    <property name="min_content_height">250</property>
+                    <child>
+                      <object class="GtkTreeView" id="treeview">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="rules_hint">True</property>
+                        <property name="search_column">1</property>
+                        <property name="hover_expand">True</property>
+                        <property name="enable_grid_lines">both</property>
+                        <property name="enable_tree_lines">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection"/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkEntry" id="inserir_site">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">site</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="inserir_login">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">login</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="inserir_senha">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="caps_lock_warning">False</property>
+                        <property name="placeholder_text" translatable="yes">senha</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
           </object>

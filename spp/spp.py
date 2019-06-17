@@ -1,13 +1,25 @@
 import gi
 from time import sleep
-from bancodedados.bancodedados import create_table, read_data
-from functions import (
-    caracteresInvalidos, senha_admin, verificar_admin, criptaes, string,
-    adicionar, atualizar, deletar, trocar_senha_admin, salt
-) # noqa
+from .bancodedados.bancodedados import create_table_dados
+from .bancodedados.bancodedados import create_table_admin
+from .bancodedados.bancodedados import read_data
+from .bancodedados.bancodedados import update_data
+from .bancodedados.bancodedados import adminQuery
+from .bancodedados.bancodedados import adminInsert
+from .bancodedados.bancodedados import data_entry
+from .bancodedados.bancodedados import delete_data
+from .bancodedados.bancodedados import getLastId
+from .bancodedados.bancodedados import delete_all_dados
+from .functions import salt
+from .functions import caracteresInvalidos
+from .functions import verificar_admin
+from .functions import trocar_senhas
+from .functions import criptaes
 from random import choices
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk  # noqa
+
+senhaAdmin = ''
 
 
 def copy(cb, texto):
@@ -19,20 +31,17 @@ class Janela:
     def __init__(self):
         # criando objetos.
         self.cb = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        self._senha_admin = ''
         self._nv = False
         self._builder = Gtk.Builder()
         self._liststore = Gtk.ListStore(int, str, str, str)
         renderText = Gtk.CellRendererText()
-        self._renderTextEditable = Gtk.CellRendererText()
-        self._renderTextEditable2 = Gtk.CellRendererText()
-        self._renderTextEditable3 = Gtk.CellRendererText()
+        renderText2 = Gtk.CellRendererText()
+        renderText3 = Gtk.CellRendererText()
+        renderText4 = Gtk.CellRendererText()
         self._coluna = Gtk.TreeViewColumn("id", renderText, text=0)
-        coluna2 = Gtk.TreeViewColumn("site", self._renderTextEditable, text=1)
-        coluna3 = Gtk.TreeViewColumn("login",
-                                     self._renderTextEditable2, text=2)
-        coluna4 = Gtk.TreeViewColumn("senha",
-                                     self._renderTextEditable3, text=3)
+        coluna2 = Gtk.TreeViewColumn("site", renderText2, text=1)
+        coluna3 = Gtk.TreeViewColumn("login", renderText3, text=2)
+        coluna4 = Gtk.TreeViewColumn("senha", renderText4, text=3)
 
         # obtendo a interface glade.
         self._builder.add_from_file('spp.glade')
@@ -50,15 +59,15 @@ class Janela:
         self._senha3 = self._builder.get_object('senha3')
         self._adicionar = self._builder.get_object('adicionar')
         self._remover = self._builder.get_object('remover')
-        self._atualizar = self._builder.get_object('atualizar')
         self._remover_tudo = self._builder.get_object('remover_tudo')
         self._copiar = self._builder.get_object('copiar')
         self._box_senha = self._builder.get_object('box_senha')
+        self._inserir_site = self._builder.get_object('inserir_site')
+        self._inserir_login = self._builder.get_object('inserir_login')
+        self._inserir_senha = self._builder.get_object('inserir_senha')
+        self._atualizar = self._builder.get_object('atualizar')
 
         # configurando.
-        self._renderTextEditable.set_property('editable', True)
-        self._renderTextEditable2.set_property('editable', True)
-        self._renderTextEditable3.set_property('editable', True)
         self._treeview.append_column(self._coluna)
         self._treeview.append_column(coluna2)
         self._treeview.append_column(coluna3)
@@ -67,11 +76,8 @@ class Janela:
         self._janela1.set_title('Super Protect Password')
         self._janela2.set_title('spp')
         self._status.push(0, 'status:')
-        self._cor_ori = self._atualizar.get_use_stock()
-        self._cor_red = Gtk.ColorButton('red')
         # self._verificar.set_sensitive(False)
-        salSenha = senha_admin()
-        if not any(salSenha):
+        if not any(adminQuery()):
             self._nv = True
             self._builder.get_object('texto_primeira_vez').set_visible(True)
             self._box_n_u.set_visible(True)
@@ -88,72 +94,75 @@ class Janela:
         self._senha3.connect('activate', self._enter_senha)
         self._adicionar.connect('clicked', self.adicionar_clicado)
         self._remover.connect('clicked', self.remover_clicado)
-        self._atualizar.connect('clicked', self.atualizar_clicado)
         self._remover_tudo.connect('clicked', self.remover_tudo_clicado)
         self._copiar.connect('clicked', self.copiar_clicado)
-        self._renderTextEditable.connect("edited", self._alterado)
-        self._renderTextEditable2.connect("edited", self._alterado2)
-        self._renderTextEditable3.connect("edited", self._alterado3)
         self._selecao = self._treeview.get_selection()
+        self._atualizar.connect('clicked', self.atualizar_clicado)
+        self._inserir_senha.connect('activate', self.adicionar_clicado)
 
     def verificar_clicado(self, widget):
         senha, senha2 = self._senha.get_text(), self._senha2.get_text()
         senha3 = self._senha3.get_text()
         self._limpar_senhas()
-        if self._nv:
-            # novo usuário
-            if all([senha2 == senha3,
-                    not caracteresInvalidos(senha2), senha2]):
-                adicionar(senha2, admin=True)
-                self._senha_admin = criptaes(string, senha2)
-                self._status.push(0, 'status: senha admin criada')
-                self._nova_janela()
-                self._exibir_senhas(senha2)
-            else:
-                mensagem = ('status: senhas desiguais ou caracteres inválidos'
-                            ': __1, __2 ... __45')
-                self._status.push(0, mensagem)
+        if all([not self._nv, self._trocar_senha.get_active(), senha]):
+            self.trocar_senhas(senha, senha2, senha3)
+        elif self._nv:
+            self.novo_usuario(senha2, senha3)
         elif all([not self._nv, not self._trocar_senha.get_active(), senha]):
-            # velho usuário
-            if verificar_admin(senha):
-                self._senha_admin = criptaes(string, senha)
-                self._nova_janela()
-                self._exibir_senhas(senha)
-            else:
-                self._status.push(0, 'status: senha admin errada')
-                sleep(3)
-        elif all([not self._nv, self._trocar_senha.get_active(), senha]):
-            # trocar senha
-            condicoes = [senha2 == senha3, not caracteresInvalidos(senha2),
-                         verificar_admin(senha), senha, senha2, senha3]
-            if all(condicoes):
-                trocar_senha_admin(senha, senha2)
-                self._nova_janela()
-                self._exibir_senhas(senha2)
-            elif senha2 != senha3:
-                self._status.push(0, 'status: senhas desiguais')
-            elif caracteresInvalidos(senha2):
-                self._status.push(0, ('status: caracteres inválidos: __1, __2'
-                                      ' ... __45'))
-            elif not condicoes[2]:
-                self._status.push(0, 'status: senha admin errada')
-                sleep(3)
-            elif not all(condicoes[3:6]):
-                self._status.push(0, 'status: colunas não preenchidas')
-            else:
-                Gtk.quit()
+            self.velho_usuario(senha)
+
+    def trocar_senhas(self, senha, senha2, senha3):
+        global senhaAdmin
+        condicoes = (senha2 == senha3, not caracteresInvalidos(senha2),
+                     verificar_admin(senha), senha2, senha3)
+        if all(condicoes):
+            senhaAdmin = senha
+            trocar_senhas(senhaAdmin, senha2)
+            senhaAdmin = senha2
+            self._nova_janela()
+            self._exibir_senhas()
+        elif senha2 != senha3:
+            self._status.push(0, 'status: senhas desiguais')
+        elif not verificar_admin(senha):
+            self._status.push(0, 'status: senha admin errada')
+            sleep(3)
+        elif not all(condicoes[3:]):
+            self._status.push(0, 'status: colunas não preenchidas')
+        else:
+            Gtk.quit()
+
+    def novo_usuario(self, senha2, senha3):
+        global senhaAdmin
+        if all([senha2, senha3, senha2 == senha3,]):
+            adminInsert(senha2)
+            self._nova_janela()
+            senhaAdmin = senha2
+            self._exibir_senhas()
+        else:
+            mensagem = ('status: senhas desiguais ou caracteres inválidos'
+                        ': __1, __2 ... __45')
+            self._status.push(0, mensagem)
+
+    def velho_usuario(self, senha):
+        global senhaAdmin
+        if verificar_admin(senha):
+            self._nova_janela()
+            senhaAdmin = senha
+            self._exibir_senhas()
+        else:
+            self._status.push(0, 'status: senha admin errada')
+            sleep(3)
 
     def _nova_janela(self):
         self._janela1.hide()
         self._janela2.show()
 
-    def _exibir_senhas(self, senha):
-        for usuario in read_data()[1:]:
+    def _exibir_senhas(self):
+        global senhaAdmin
+        for usuario in read_data():
             usuario = list(usuario)
-            su = criptaes(senha, aes_senha=usuario[3])[5:]
-            usuario[0], usuario[3] = usuario[0] - 1, su
+            usuario[3] = criptaes(senhaAdmin, usuario[3], True)[5:]
             self._liststore.append(usuario[:4])
-        self.adicionar_clicado(self._adicionar)
 
     def _enter_senha(self, widget):
         if widget.get_text():
@@ -161,56 +170,53 @@ class Janela:
 
     def _trocar_senha_alterado(self, widget):
         self._limpar_senhas()
-        self._box_n_u.set_visible(True if widget.get_active() else False)
+        self._box_n_u.set_visible(widget.get_active())
 
     def adicionar_clicado(self, widget):
+        global senhaAdmin
         data = list(map(list, self._liststore))
-        if any(data) and any(data[-1][1:]):
-            # a linha abaixo funciona mas não como o esperado? verificar
-            numero = data[-1][0] + 1 if len(data) else 1
-            self._liststore.append([numero, '', '', ''])
-        elif not any(data):
-            self._liststore.append([1, '', '', ''])
-        self._atualizar.set_use_stock(self._cor_red)
+        site, login, senha = self._obter_itens()
+        if all([site, login, senha]):
+            data_entry(senhaAdmin, site, login, senha)
+            numero = getLastId()[0][0]
+            self._liststore.append([numero, site, login, senha])
+        self._limpar_dados_inserir()
+        self._inserir_site.do_grab_focus(self._inserir_site)
+
+        # self._atualizar.set_use_stock(self._cor_red)   # reutilizar?
 
     def remover_clicado(self, widget):
         data, item = self._selecao.get_selected()
-        data2 = list(map(list, self._liststore))
-        if all([data, item]):
-            deletar(data[item][0])
+        if all((data, item)):
+            delete_data(data[item][0])
             self._liststore.remove(item)
-            if not any(data2):
-                self.adicionar_clicado(self._adicionar)
         else:
             print('você não selecionou nada')
-
-    def atualizar_clicado(self, widget):
-        senha = criptaes(string, aes_senha=self._senha_admin)
-        liststore = list(map(list, self._liststore))
-        for n, *items in liststore:
-            if any(items):
-                dados = read_data(id=n+1)
-                if any(dados):
-                    dados = list(dados[0])
-                    dados[3] = criptaes(senha,
-                                        aes_senha=dados[3])[5:]
-                    if all([items != dados[1:4], n+1 == dados[0]]):
-                        atualizar(senha, n, *items, salt())
-                else:
-                    adicionar(senha, *items)
-        if len(liststore) == 1 and not any(liststore[0][1:]):
-            for a in read_data()[1:]:
-                deletar(a[0]-1)
-        self._liststore.clear()
-        self._exibir_senhas(senha)
-        self._selecao = self._treeview.get_selection()
-        self._atualizar.set_use_stock(self._cor_ori)
 
     def remover_tudo_clicado(self, widget):
         self._liststore.clear()
         self._selecao = self._treeview.get_selection()
-        self.adicionar_clicado(self._adicionar)
-        self._atualizar.set_use_stock(self._cor_red)
+        delete_all_dados()
+
+    def atualizar_clicado(self, widget):
+        global senhaAdmin
+        site, login, senha = self._obter_itens()
+        data, item = self._selecao.get_selected()
+        if all((data, item)):
+            update_data(senhaAdmin, data[item][0], site, login, senha)
+            self._liststore[item] = [data[item][0], site, login, senha]
+        self._limpar_dados_inserir()
+
+    def _obter_itens(self):
+        site = self._inserir_site.get_text()
+        login = self._inserir_login.get_text()
+        senha = self._inserir_senha.get_text()
+        return site, login, senha
+
+    def _limpar_dados_inserir(self):
+        self._inserir_site.set_text('')
+        self._inserir_login.set_text('')
+        self._inserir_senha.set_text('')
 
     def _limpar_senhas(self):
         self._senha.set_text('')
@@ -231,8 +237,14 @@ class Janela:
         self._liststore[path][3] = text
 
 
-def main(string=string):
-    string = ''.join(choices(string, k=200))
-    create_table()
-    app = Janela()  # noqa
+def main():
+    create_table_admin()
+    create_table_dados()
+    app = Janela()
     Gtk.main()
+
+
+# TODO: trocar o nome do botão 'verificar' para 'trocar' quando clicado
+# em alterar senha.
+# TODO: alterar o nome do botão 'verificar' para 'criar' ou algo assim
+# quando o usuário for novato.
