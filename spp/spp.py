@@ -16,6 +16,8 @@ from .functions import verificar_admin
 from .functions import trocar_senhas
 from .functions import criptaes
 from random import choices
+from webbrowser import open as openn
+from re import findall
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk  # noqa
 
@@ -38,7 +40,7 @@ class Janela:
         renderText2 = Gtk.CellRendererText()
         renderText3 = Gtk.CellRendererText()
         renderText4 = Gtk.CellRendererText()
-        self._coluna = Gtk.TreeViewColumn("id", renderText, text=0)
+        coluna = Gtk.TreeViewColumn("id", renderText, text=0)
         coluna2 = Gtk.TreeViewColumn("site", renderText2, text=1)
         coluna3 = Gtk.TreeViewColumn("login", renderText3, text=2)
         coluna4 = Gtk.TreeViewColumn("senha", renderText4, text=3)
@@ -54,6 +56,7 @@ class Janela:
         self._box_n_u = self._builder.get_object('novo_usuario')
         self._trocar_senha = self._builder.get_object('check_trocar_senha')
         self._treeview = self._builder.get_object('treeview')
+        self._selecao = self._treeview.get_selection()
         self._senha = self._builder.get_object('senha')
         self._senha2 = self._builder.get_object('senha2')
         self._senha3 = self._builder.get_object('senha3')
@@ -66,9 +69,19 @@ class Janela:
         self._inserir_login = self._builder.get_object('inserir_login')
         self._inserir_senha = self._builder.get_object('inserir_senha')
         self._atualizar = self._builder.get_object('atualizar')
+        texto = ('Essa ação removerá todos as contas armazenadas. Tem certeza'
+                 ' que deseja remover todas as contas? essa ação é'
+                 ' irreversível!')
+        self._confirmacao = Gtk.MessageDialog(
+            text='Atenção!',
+            secondary_text=texto,
+            buttons=Gtk.ButtonsType.OK_CANCEL)
+        self._confirmacao2 = Gtk.MessageDialog(
+            secondary_text='Remover?',
+            buttons=Gtk.ButtonsType.OK_CANCEL)
 
         # configurando.
-        self._treeview.append_column(self._coluna)
+        self._treeview.append_column(coluna)
         self._treeview.append_column(coluna2)
         self._treeview.append_column(coluna3)
         self._treeview.append_column(coluna4)
@@ -76,6 +89,9 @@ class Janela:
         self._janela1.set_title('Super Protect Password')
         self._janela2.set_title('spp')
         self._status.push(0, 'status:')
+        self._confirmacao.set_transient_for(self._janela2)
+        self._janela1.set_transient_for(self._janela2)
+        self._confirmacao2.set_transient_for(self._janela2)
         # self._verificar.set_sensitive(False)
         if not any(adminQuery()):
             self._nv = True
@@ -83,6 +99,7 @@ class Janela:
             self._box_n_u.set_visible(True)
             self._box_senha.set_visible(False)
             self._trocar_senha.set_visible(False)
+            self._verificar.set_label('Confirmar')
 
         # conectando objetos.
         self._verificar.connect('clicked', self.verificar_clicado)
@@ -96,9 +113,21 @@ class Janela:
         self._remover.connect('clicked', self.remover_clicado)
         self._remover_tudo.connect('clicked', self.remover_tudo_clicado)
         self._copiar.connect('clicked', self.copiar_clicado)
-        self._selecao = self._treeview.get_selection()
         self._atualizar.connect('clicked', self.atualizar_clicado)
         self._inserir_senha.connect('activate', self.adicionar_clicado)
+        self._confirmacao.connect('response', lambda a, b: (a, b))
+        self._confirmacao2.connect('response', lambda a, b: (a, b))
+        self._treeview.connect('row-activated', self.treeviewcolumn_clicado)
+        self._inserir_site.connect(
+            'activate',
+            lambda a, *_: a.do_grab_focus(self._inserir_login))
+        self._inserir_login.connect(
+            'activate',
+            lambda a, *_: a.do_grab_focus(self._inserir_senha))
+        coluna.connect('clicked', self.treeviewcolumn_clicado)
+        coluna2.connect('clicked', self.treeviewcolumn_clicado)
+        coluna3.connect('clicked', self.treeviewcolumn_clicado)
+        coluna4.connect('clicked', self.treeviewcolumn_clicado)
 
     def verificar_clicado(self, widget):
         senha, senha2 = self._senha.get_text(), self._senha2.get_text()
@@ -171,12 +200,13 @@ class Janela:
     def _trocar_senha_alterado(self, widget):
         self._limpar_senhas()
         self._box_n_u.set_visible(widget.get_active())
+        self._verificar.set_label('Trocar senha' if widget.get_active()
+                                  else 'Verificar')
 
     def adicionar_clicado(self, widget):
         global senhaAdmin
-        data = list(map(list, self._liststore))
         site, login, senha = self._obter_itens()
-        if all([site, login, senha]):
+        if all((site, login, senha)):
             data_entry(senhaAdmin, site, login, senha)
             numero = getLastId()[0][0]
             self._liststore.append([numero, site, login, senha])
@@ -188,21 +218,23 @@ class Janela:
     def remover_clicado(self, widget):
         data, item = self._selecao.get_selected()
         if all((data, item)):
-            delete_data(data[item][0])
-            self._liststore.remove(item)
-        else:
-            print('você não selecionou nada')
+            if self._confirmacao2.run() == -5:
+                delete_data(data[item][0])
+                self._liststore.remove(item)
+            self._confirmacao2.hide()
 
     def remover_tudo_clicado(self, widget):
-        self._liststore.clear()
-        self._selecao = self._treeview.get_selection()
-        delete_all_dados()
+        if self._confirmacao.run() == -5:
+            self._liststore.clear()
+            self._selecao = self._treeview.get_selection()
+            delete_all_dados()
+        self._confirmacao.hide()
 
     def atualizar_clicado(self, widget):
         global senhaAdmin
         site, login, senha = self._obter_itens()
         data, item = self._selecao.get_selected()
-        if all((data, item)):
+        if all((data, item, site, login, senha)):
             update_data(senhaAdmin, data[item][0], site, login, senha)
             self._liststore[item] = [data[item][0], site, login, senha]
         self._limpar_dados_inserir()
@@ -227,14 +259,27 @@ class Janela:
         data, item = self._selecao.get_selected()
         copy(self.cb, data[item][3])
 
-    def _alterado(self, widget, path, text):
-        self._liststore[path][1] = text
+    def treeviewcolumn_clicado(self, widget, path, column):
+        items = dict(zip(('site', 'login', 'senha'),
+                         self._liststore[path][1:]))
+        nome_coluna = column.get_title()
+        if nome_coluna == 'site':
+            if findall(r'^(http|https)://', items[nome_coluna]):
+                openn(items[nome_coluna])
+            else:
+                openn('http://' + items[nome_coluna])
+        elif nome_coluna in items:
+            copy(self.cb, items[nome_coluna])
+            # exiba uma mensagem na tela copiando
+            # f'{nome_coluna} copiado(a) para a área de transferência'
 
-    def _alterado2(self, widget, path, text):
-        self._liststore[path][2] = text
+    def treeviewcolumn3_clicado(self, widget, path, text):
+        print(3)
+        openn(self._liststore[path][column])
 
-    def _alterado3(self, widget, path, text):
-        self._liststore[path][3] = text
+    def treeviewcolumn4_clicado(self, widget, path, text):
+        print(4)
+        openn(self._liststore[path][column])
 
 
 def main():
@@ -244,7 +289,11 @@ def main():
     Gtk.main()
 
 
-# TODO: trocar o nome do botão 'verificar' para 'trocar' quando clicado
-# em alterar senha.
-# TODO: alterar o nome do botão 'verificar' para 'criar' ou algo assim
-# quando o usuário for novato.
+# TODO:
+# clicar duas vezes e abrir o site na web?
+# clicar duas vezes e copiar login
+# clicar duas vezes e copiar senha
+# aviso na tela que senha ou login foram copiados
+# aviso na tela quando o item não oi selecionado e algum botão foi precionado
+# usar a função read_data(login=?) ou remover?
+# botão de editar envia os dados para as caixas de texto, lá vc edita?

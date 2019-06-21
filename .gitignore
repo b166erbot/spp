@@ -114,3 +114,5 @@ spp-antigo.py
 Pip*
 #*#
 spp.backup
+spp/criptografia/criptografia_assimetrica.py
+exemplo\ de\ aviso.txt

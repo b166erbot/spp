@@ -216,7 +216,7 @@ insira uma nova senha de administrador e desfrute-o.</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">se você deseja alterar a senha.</property>
+                <property name="tooltip_text" translatable="yes">troca a senha principal.</property>
                 <property name="halign">start</property>
                 <property name="margin_left">10</property>
                 <property name="draw_indicator">True</property>
@@ -418,9 +418,9 @@ insira uma nova senha de administrador e desfrute-o.</property>
                     <child>
                       <object class="GtkTreeView" id="treeview">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can_focus">True</property>
                         <property name="rules_hint">True</property>
-                        <property name="search_column">1</property>
+                        <property name="search_column">0</property>
                         <property name="hover_expand">True</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="enable_tree_lines">True</property>
@@ -444,6 +444,7 @@ insira uma nova senha de administrador e desfrute-o.</property>
                       <object class="GtkEntry" id="inserir_site">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">mova para a próxima entrada com enter ou tab</property>
                         <property name="caps_lock_warning">False</property>
                         <property name="placeholder_text" translatable="yes">site</property>
                       </object>
@@ -457,6 +458,7 @@ insira uma nova senha de administrador e desfrute-o.</property>
                       <object class="GtkEntry" id="inserir_login">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">mova para a próxima entrada com enter ou tab</property>
                         <property name="caps_lock_warning">False</property>
                         <property name="placeholder_text" translatable="yes">login</property>
                       </object>
@@ -470,6 +472,7 @@ insira uma nova senha de administrador e desfrute-o.</property>
                       <object class="GtkEntry" id="inserir_senha">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">para adicionar aperte enter.</property>
                         <property name="caps_lock_warning">False</property>
                         <property name="placeholder_text" translatable="yes">senha</property>
                       </object>
