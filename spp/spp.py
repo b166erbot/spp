@@ -1,30 +1,29 @@
-import gi
-from time import sleep
-from .bancodedados.bancodedados import create_table_dados
-from .bancodedados.bancodedados import create_table_admin
-from .bancodedados.bancodedados import read_data
-from .bancodedados.bancodedados import update_data
-from .bancodedados.bancodedados import adminQuery
-from .bancodedados.bancodedados import adminInsert
-from .bancodedados.bancodedados import data_entry
-from .bancodedados.bancodedados import delete_data
-from .bancodedados.bancodedados import getLastId
-from .bancodedados.bancodedados import delete_all_dados
-from .functions import salt
-from .functions import caracteresInvalidos
-from .functions import verificar_admin
-from .functions import trocar_senhas
-from .functions import criptaes
 from random import choices
-from webbrowser import open as openn
 from re import findall
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk  # noqa
+from time import sleep
+from webbrowser import open as openn
+
+import gi
+gi.require_version('Gtk', '3.0')  # NOQA
+gi.require_version('Gdk', '3.0')  # NOQA
+from gi.repository import Gdk, Gtk
+from .bancodedados.bancodedados import (adminInsert, adminQuery,
+                                           create_table_admin,
+                                           create_table_dados, data_entry,
+                                           delete_all_dados, delete_data,
+                                           getLastId, read_data, update_data)
+from .functions import (caracteresInvalidos, criptaes, cripthash, salt,
+                           trocar_senhas, verificar_admin)
+
+
+
+
 
 senhaAdmin = ''
 
 
 def copy(cb, texto):
+    """ Função que copia o texto para a área de transferência. """
     cb.set_text(texto, -1)
     cb.store()
 
@@ -124,10 +123,10 @@ class Janela:
         self._inserir_login.connect(
             'activate',
             lambda a, *_: a.do_grab_focus(self._inserir_senha))
-        coluna.connect('clicked', self.treeviewcolumn_clicado)
-        coluna2.connect('clicked', self.treeviewcolumn_clicado)
-        coluna3.connect('clicked', self.treeviewcolumn_clicado)
-        coluna4.connect('clicked', self.treeviewcolumn_clicado)
+        # coluna.connect('clicked', self.treeviewcolumn_clicado)
+        # coluna2.connect('clicked', self.treeviewcolumn_clicado)
+        # coluna3.connect('clicked', self.treeviewcolumn_clicado)
+        # coluna4.connect('clicked', self.treeviewcolumn_clicado)
 
     def verificar_clicado(self, widget):
         senha, senha2 = self._senha.get_text(), self._senha2.get_text()
@@ -140,7 +139,7 @@ class Janela:
         elif all([not self._nv, not self._trocar_senha.get_active(), senha]):
             self.velho_usuario(senha)
 
-    def trocar_senhas(self, senha, senha2, senha3):
+    def trocar_senhas(self, senha, senha2, senha3):  # refatorar
         global senhaAdmin
         condicoes = (senha2 == senha3, not caracteresInvalidos(senha2),
                      verificar_admin(senha), senha2, senha3)
@@ -157,13 +156,16 @@ class Janela:
             sleep(3)
         elif not all(condicoes[3:]):
             self._status.push(0, 'status: colunas não preenchidas')
+        elif caracteresInvalidos(senha2):
+            self._status.push(0, 'status: caracteres inválidos ___1, ___2...')
         else:
-            Gtk.quit()
+            Gtk.main_quit()
 
     def novo_usuario(self, senha2, senha3):
         global senhaAdmin
-        if all([senha2, senha3, senha2 == senha3,]):
-            adminInsert(senha2)
+        if all([senha2, senha2 == senha3]):
+            sal = salt()
+            adminInsert(cripthash(sal + senha2), sal)
             self._nova_janela()
             senhaAdmin = senha2
             self._exibir_senhas()
@@ -207,13 +209,12 @@ class Janela:
         global senhaAdmin
         site, login, senha = self._obter_itens()
         if all((site, login, senha)):
-            data_entry(senhaAdmin, site, login, senha)
+            sal = salt()
+            data_entry(site, login, criptaes(senhaAdmin, sal + senha), sal)
             numero = getLastId()[0][0]
             self._liststore.append([numero, site, login, senha])
         self._limpar_dados_inserir()
         self._inserir_site.do_grab_focus(self._inserir_site)
-
-        # self._atualizar.set_use_stock(self._cor_red)   # reutilizar?
 
     def remover_clicado(self, widget):
         data, item = self._selecao.get_selected()
@@ -235,7 +236,9 @@ class Janela:
         site, login, senha = self._obter_itens()
         data, item = self._selecao.get_selected()
         if all((data, item, site, login, senha)):
-            update_data(senhaAdmin, data[item][0], site, login, senha)
+            sal = salt()
+            update_data(data[item][0], site, login,
+                        criptaes(senhaAdmin, sal + senha), sal)
             self._liststore[item] = [data[item][0], site, login, senha]
         self._limpar_dados_inserir()
 
@@ -260,26 +263,18 @@ class Janela:
         copy(self.cb, data[item][3])
 
     def treeviewcolumn_clicado(self, widget, path, column):
-        items = dict(zip(('site', 'login', 'senha'),
-                         self._liststore[path][1:]))
-        nome_coluna = column.get_title()
-        if nome_coluna == 'site':
-            if findall(r'^(http|https)://', items[nome_coluna]):
-                openn(items[nome_coluna])
-            else:
-                openn('http://' + items[nome_coluna])
-        elif nome_coluna in items:
-            copy(self.cb, items[nome_coluna])
-            # exiba uma mensagem na tela copiando
-            # f'{nome_coluna} copiado(a) para a área de transferência'
-
-    def treeviewcolumn3_clicado(self, widget, path, text):
-        print(3)
-        openn(self._liststore[path][column])
-
-    def treeviewcolumn4_clicado(self, widget, path, text):
-        print(4)
-        openn(self._liststore[path][column])
+        items = zip(('site', 'login', 'senha'), self._liststore[path][1:])
+        items = dict(items)
+        if column:
+            nome_coluna = column.get_title()
+            if nome_coluna == 'site':
+                temp = findall(r'^(http|https)://', items[nome_coluna])
+                openn(('' if temp else 'https://') + items[nome_coluna])
+            elif nome_coluna in items:
+                copy(self.cb, items[nome_coluna])
+                # exiba uma mensagem na tela copiando
+                # f'{nome_coluna} copiado(a) para a área de transferência'
+                # refatorar?
 
 
 def main():
@@ -290,10 +285,8 @@ def main():
 
 
 # TODO:
-# clicar duas vezes e abrir o site na web?
-# clicar duas vezes e copiar login
-# clicar duas vezes e copiar senha
 # aviso na tela que senha ou login foram copiados
-# aviso na tela quando o item não oi selecionado e algum botão foi precionado
+# aviso na tela quando o item não foi selecionado e algum botão foi precionado
 # usar a função read_data(login=?) ou remover?
 # botão de editar envia os dados para as caixas de texto, lá vc edita?
+# self._atualizar.set_use_stock(self._cor_red)   # reutilizar?

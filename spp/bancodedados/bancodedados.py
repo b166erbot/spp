@@ -1,7 +1,4 @@
 import sqlite3
-from spp.functions import salt
-from spp.functions import criptaes
-from spp.functions import cripthash
 
 
 def comitar(banco):
@@ -51,24 +48,20 @@ def create_table_admin():
 
 
 @comitar('spp.db')
-def data_entry(senhaAdmin, site='', login='', senha=''):
+def data_entry(site='', login='', senha='', sal=''):
     """
     Função que adiciona dados pre definidos como site, login, senha,
     sal ao banco de dados.
     """
-    sal = salt()
-    senha = criptaes(senhaAdmin, sal + senha)
     return ('INSERT INTO dados (site, login, senha, sal) VALUES(?,?,?,?)',
             (site, login, senha, sal))
 
 
 @comitar('spp.db')
-def update_data(senhaAdmin, id, site='', login='', senha=''):
+def update_data(id, site='', login='', senha='', sal=''):
     """
     Função que atualiza os dados na tabela dados.
     """
-    sal = salt()
-    senha = criptaes(senhaAdmin, sal + senha)
     return ('UPDATE dados SET site=?, login=?, senha=?, sal=?'
             f' WHERE id = {id}', (site, login, senha, sal))
 
@@ -100,17 +93,13 @@ def read_data(login=None, id=None):
 
 
 @comitar('spp.db')
-def adminUpdate(senha):
-    sal = salt()
-    senha = cripthash(sal + senha)
+def adminUpdate(senha, sal):
     return (f'UPDATE admin SET senha = ?, sal = ? WHERE id = 1',
             (senha, sal))
 
 
 @comitar('spp.db')
-def adminInsert(senha):
-    sal = salt()
-    senha = cripthash(sal + senha)
+def adminInsert(senha, sal):
     return ('INSERT INTO admin (id, senha, sal) VALUES (?,?,?)',
             (1, senha, sal))
 

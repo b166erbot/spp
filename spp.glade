@@ -420,10 +420,11 @@ insira uma nova senha de administrador e desfrute-o.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="rules_hint">True</property>
-                        <property name="search_column">0</property>
+                        <property name="search_column">1</property>
                         <property name="hover_expand">True</property>
                         <property name="enable_grid_lines">both</property>
                         <property name="enable_tree_lines">True</property>
+                        <property name="tooltip_column">1</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection"/>
                         </child>

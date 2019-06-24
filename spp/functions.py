@@ -1,10 +1,11 @@
-from spp.criptografia.criptografia_simetrica import AESCipher, dicionario
 from hashlib import sha512
-from string import printable as string
 from random import choices
-from spp.bancodedados import bancodedados
+from string import printable as string
 from sys import argv
-# bancodedados -> adminQuery, adminUpdate, read_data
+
+from .bancodedados.bancodedados import (adminQuery, adminUpdate, read_data,
+                                        update_data)
+from .criptografia.criptografia_simetrica import AESCipher, dicionario
 
 
 def salt() -> str:
@@ -14,14 +15,11 @@ def salt() -> str:
     return ''.join(choices(string, k=5))
 
 
-def caracteresInvalidos(texto: str) -> bool:  # refatorar?
+def caracteresInvalidos(texto: str) -> bool:
     """
     Função que verifica se existe caracteres inválidos no texto.
     """
-    for a in dicionario.values():
-        if a in texto:
-            return True
-    return False
+    return any(filter(lambda x: x in texto, dicionario.values()))
 
 
 def criptaes(senhaAdmin, senha: str, decript: bool = False):
@@ -45,7 +43,7 @@ def verificar_admin(senha) -> bool:
     """
     Função que lê a senha principal, compara se são iguais e retorna um bool.
     """
-    sha_admin, sal = bancodedados.adminQuery()[0]
+    sha_admin, sal = adminQuery()[0]
     sha = cripthash(sal+senha)
     return sha_admin == sha
 
@@ -54,16 +52,12 @@ def trocar_senhas(senhaAdmin, novaSenha):
     """
     Método que altera a senha admin das senhas do programa.
     """
-    bancodedados.adminUpdate(novaSenha)
-    for row in bancodedados.read_data():
-        row = list(row)
-        senha = criptaes(senhaAdmin, row[3], True)[5:]  # slice remove o sal
-        row[3] = senha
+    sal = salt()
+    adminUpdate(cripthash(sal + novaSenha), sal)
+    for row in read_data():
+        row, sal = list(row), salt()
+        row[3] = criptaes(senhaAdmin, row[3], True)[5:]  # slice remove o sal
         senhaAdmin, novaSenha = novaSenha, senhaAdmin
-        row.pop()
-        bancodedados.update_data(senhaAdmin, *row)
+        row[3: 5] = criptaes(senhaAdmin, sal + row[3]), sal
+        update_data(*row)
         senhaAdmin, novaSenha = novaSenha, senhaAdmin
-
-
-if __name__ == '__main__':
-    print(criptaes(1, argv[2], True))
