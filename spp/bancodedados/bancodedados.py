@@ -79,17 +79,9 @@ def delete_all_dados():
     return 'DELETE FROM dados WHERE id',
 
 
-# precisa procurar por login?
-# função não responsiva, refatorar?
 @comitar('spp.db')
 def read_data(login=None, id=None):
-    if id:
-        return f'SELECT * FROM dados WHERE id = {id}',
-    elif login:
-        return ('SELECT * FROM dados WHERE login LIKE'
-                f' "%{login}%" or site LIKE "%{login}%"',)
-    else:
-        return 'SELECT * FROM dados',
+    return 'SELECT * FROM dados',
 
 
 @comitar('spp.db')

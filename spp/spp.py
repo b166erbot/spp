@@ -4,19 +4,17 @@ from time import sleep
 from webbrowser import open as openn
 
 import gi
-gi.require_version('Gtk', '3.0')  # NOQA
-gi.require_version('Gdk', '3.0')  # NOQA
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
 from gi.repository import Gdk, Gtk
+
 from .bancodedados.bancodedados import (adminInsert, adminQuery,
-                                           create_table_admin,
-                                           create_table_dados, data_entry,
-                                           delete_all_dados, delete_data,
-                                           getLastId, read_data, update_data)
-from .functions import (caracteresInvalidos, criptaes, cripthash, salt,
-                           trocar_senhas, verificar_admin)
-
-
-
+                                        create_table_admin, create_table_dados,
+                                        data_entry, delete_all_dados,
+                                        delete_data, getLastId, read_data,
+                                        update_data)
+from .functions import (criptaes, cripthash, salt, trocar_senhas,
+                        verificar_admin)
 
 
 senhaAdmin = ''
@@ -141,8 +139,7 @@ class Janela:
 
     def trocar_senhas(self, senha, senha2, senha3):  # refatorar
         global senhaAdmin
-        condicoes = (senha2 == senha3, not caracteresInvalidos(senha2),
-                     verificar_admin(senha), senha2, senha3)
+        condicoes = (senha2 == senha3, verificar_admin(senha), senha2, senha3)
         if all(condicoes):
             senhaAdmin = senha
             trocar_senhas(senhaAdmin, senha2)
@@ -154,10 +151,8 @@ class Janela:
         elif not verificar_admin(senha):
             self._status.push(0, 'status: senha admin errada')
             sleep(3)
-        elif not all(condicoes[3:]):
+        elif not all(condicoes[2:]):
             self._status.push(0, 'status: colunas não preenchidas')
-        elif caracteresInvalidos(senha2):
-            self._status.push(0, 'status: caracteres inválidos ___1, ___2...')
         else:
             Gtk.main_quit()
 
@@ -170,9 +165,7 @@ class Janela:
             senhaAdmin = senha2
             self._exibir_senhas()
         else:
-            mensagem = ('status: senhas desiguais ou caracteres inválidos'
-                        ': __1, __2 ... __45')
-            self._status.push(0, mensagem)
+            self._status.push(0, 'status: senhas desiguais')
 
     def velho_usuario(self, senha):
         global senhaAdmin

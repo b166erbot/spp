@@ -5,7 +5,7 @@ from sys import argv
 
 from .bancodedados.bancodedados import (adminQuery, adminUpdate, read_data,
                                         update_data)
-from .criptografia.criptografia_simetrica import AESCipher, dicionario
+from .criptografia.criptografia_simetrica import AESCipher
 
 
 def salt() -> str:
@@ -13,13 +13,6 @@ def salt() -> str:
     Função que retorna um sal para ser acrescentado a senha.
     """
     return ''.join(choices(string, k=5))
-
-
-def caracteresInvalidos(texto: str) -> bool:
-    """
-    Função que verifica se existe caracteres inválidos no texto.
-    """
-    return any(filter(lambda x: x in texto, dicionario.values()))
 
 
 def criptaes(senhaAdmin, senha: str, decript: bool = False):
