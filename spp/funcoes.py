@@ -1,11 +1,9 @@
 from hashlib import sha512
 from random import choices
 from string import printable as string
-from sys import argv
 
-from .bancodedados.bancodedados import (adminQuery, adminUpdate, read_data,
-                                        update_data)
 from .criptografia.criptografia_simetrica import AESCipher
+from .crud.crud import adminQuery, adminUpdate, read_data, update_data
 
 
 def salt() -> str:
@@ -54,3 +52,9 @@ def trocar_senhas(senhaAdmin, novaSenha):
         row[3: 5] = criptaes(senhaAdmin, sal + row[3]), sal
         update_data(*row)
         senhaAdmin, novaSenha = novaSenha, senhaAdmin
+
+
+def copy(cb, texto):
+    """ Função que copia o texto para a área de transferência. """
+    cb.set_text(texto, -1)
+    cb.store()

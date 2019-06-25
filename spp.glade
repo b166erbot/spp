@@ -342,7 +342,7 @@ insira uma nova senha de administrador e desfrute-o.</property>
                     <property name="can_focus">False</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">atualiza os dados do item selecionado.</property>
+                    <property name="tooltip_text" translatable="yes">altera os dados do item selecionado.</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -502,6 +502,15 @@ insira uma nova senha de administrador e desfrute-o.</property>
             <property name="top_attach">1</property>
           </packing>
         </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkPopover" id="popover">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkLabel" id="poplabel">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
       </object>
     </child>
   </object>
