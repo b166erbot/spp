@@ -20,6 +20,6 @@ class MultiThread:
 def rodar(tarefa, queue):
     while True:
         # é obrigatório armazenar em uma variável ou condicionar com if a queue
-        temp = queue.get()  # noqa
-        tarefa()
+        temp = queue.get()
+        tarefa(*temp) if temp else tarefa()
         queue.task_done()

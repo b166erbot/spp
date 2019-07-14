@@ -2,9 +2,6 @@
 Super Protect Password
 =======================
 
-:Author: `Bernardo Freitas <//github.com/bernardofreitas>`_
-
-
 Requirements:
 ============
 
@@ -25,4 +22,4 @@ License:
 Contributors:
 =============
 
-    - `Bernardo Freitas <//github.com/bernardofreitas>`_
+    - `b166erobot <//github.com/b166erobot>`_

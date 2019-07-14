@@ -145,7 +145,7 @@ class Janela:
         condicoes = (senha2 == senha3, verificar_admin(senha), senha2, senha3)
         if all(condicoes):
             senhaAdmin = senha
-            trocar_senhas(senhaAdmin, senha2)
+            self.queues['trocar_senhas'].put((senhaAdmin, senha2))
             senhaAdmin = senha2
             self._nova_janela()
             self.queues['exibir_senhas'].put('')
@@ -307,9 +307,9 @@ def main():
     create_table_admin()
     create_table_dados()
     app = Janela()
-    nomes = ('exibir_senhas',)
+    nomes = ('exibir_senhas', 'trocar_senhas')
     app.queues = dict((a, Queue()) for a in nomes)
-    funcoes = (app._exibir_senhas,)
+    funcoes = (app._exibir_senhas, trocar_senhas)
     threads = MultiThread(funcoes, app.queues.values(), Gtk.main)
     threads.rodar()
 
