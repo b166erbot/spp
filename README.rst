@@ -15,9 +15,9 @@ Python version:
 
 Preview:
 =======
-  ![image](preview/login_sign_up.png)
+  ![image](https://github.com/b166erobot/spp/blob/master/preview/login_sign_up.png)
 
-  ![image](preview/passwords.png)
+  ![image](https://github.com/b166erobot/spp/blob/master/preview/passwords.png)
 
 License:
 =======
