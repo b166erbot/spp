@@ -4,8 +4,8 @@ Super Protect Password
 Requirements:
 ============
 
-  - gi -> sudo apt-get install python3-gi
-  - pycrypto>=2.6.1
+  - pygobject
+  - pycrypto
   - To install execute: pip3 install -r requirements.txt
 
 Python version:
